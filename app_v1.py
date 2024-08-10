@@ -104,6 +104,7 @@ def create_portfolio_value_plot(results):
     ))
 
     fig.update_layout(
+        autosize=True,
         height=400,
         title=dict(text="Portfolio Value Over Time", y=0.98, x=0.5, xanchor='center', yanchor='top'),
         xaxis_title="Years",
