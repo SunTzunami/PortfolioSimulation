@@ -84,10 +84,8 @@ def simulate_retirement_savings(
     
     return df
 
-def create_plot(results, params):
-    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.25,
-                        subplot_titles=("Portfolio Value", "Monthly Contribution"),
-                        row_heights=[0.65, 0.35])
+def create_portfolio_value_plot(results):
+    fig = go.Figure()
 
     fig.add_trace(go.Scatter(
         x=results['Year'],
@@ -95,7 +93,7 @@ def create_plot(results, params):
         mode='lines',
         name='Nominal Value',
         line=dict(color='#1f77b4', width=2)
-    ), row=1, col=1)
+    ))
 
     fig.add_trace(go.Scatter(
         x=results['Year'],
@@ -103,7 +101,21 @@ def create_plot(results, params):
         mode='lines',
         name='Real Value',
         line=dict(color='#ff7f0e', width=2)
-    ), row=1, col=1)
+    ))
+
+    fig.update_layout(
+        height=400,
+        title=dict(text="Portfolio Value Over Time", y=0.98, x=0.5, xanchor='center', yanchor='top'),
+        xaxis_title="Years",
+        yaxis_title="Value (Crores ₹)",
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        margin=dict(l=20, r=20, t=40, b=20)
+    )
+
+    return fig
+
+def create_contribution_plot(results):
+    fig = go.Figure()
 
     fig.add_trace(go.Scatter(
         x=results['Year'],
@@ -111,18 +123,15 @@ def create_plot(results, params):
         mode='lines',
         name='Monthly Contribution',
         line=dict(color='#2ca02c', width=2)
-    ), row=2, col=1)
+    ))
 
     fig.update_layout(
-        height=600,
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-        margin=dict(l=20, r=20, t=120, b=20),
-        title=dict(text="Retirement Savings Simulation", y=0.98, x=0.5, xanchor='center', yanchor='top')
+        height=400,
+        title=dict(text="Monthly Contribution Over Time", y=0.98, x=0.5, xanchor='center', yanchor='top'),
+        xaxis_title="Years",
+        yaxis_title="Contribution (Lakhs ₹)",
+        margin=dict(l=20, r=20, t=40, b=20)
     )
-
-    fig.update_xaxes(title_text="Years", row=2, col=1)
-    fig.update_yaxes(title_text="Value (Crores ₹)", row=1, col=1)
-    fig.update_yaxes(title_text="Contribution (Lakhs ₹)", row=2, col=1)
 
     return fig
 
@@ -138,7 +147,7 @@ def main():
     years_to_retirement = st.sidebar.slider("Years to Retirement", 5, 40, 30, 1)
     annual_income_growth_rate = st.sidebar.slider("Annual Income Growth Rate", 0.01, 0.10, 0.05, 0.01, format="%.2f")
     
-    plan_for_family = st.sidebar.checkbox("Plan for Family Growth", value=True)
+    plan_for_family = st.sidebar.checkbox("Plan for Family Growth", value=False)
     family_growth_year = None
     family_growth_expense = 0
     if plan_for_family:
@@ -169,8 +178,12 @@ def main():
         params["Family Growth Year"] = family_growth_year
         params["Family Expense"] = f"₹{family_growth_expense/100000:.2f} Lakhs/month"
 
-    fig = create_plot(results, params)
-    st.plotly_chart(fig, use_container_width=True)
+    # Generate and display the plots
+    portfolio_value_fig = create_portfolio_value_plot(results)
+    contribution_fig = create_contribution_plot(results)
+
+    st.plotly_chart(portfolio_value_fig, use_container_width=True)
+    st.plotly_chart(contribution_fig, use_container_width=True)
 
     st.header("Simulation Parameters")
     for key, value in params.items():
@@ -186,3 +199,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
