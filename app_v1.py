@@ -7,16 +7,36 @@ from plotly.subplots import make_subplots
 def inject_css():
     st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
-
+    /* Override specific elements while preserving Streamlit's dark background */
+    .css-1v3fvcr {  /* Sidebar container */
+        background-color: #2e2e2e !important;  /* Ensure sidebar remains dark */
+    }
+    .css-1lcbmhc {  /* Main container */
+        background-color: #1e1e1e !important;  /* Ensure main content area remains dark */
+    }
+    .css-1aumxhk {  /* Main content area */
+        color: #e0e0e0 !important;  /* Light text color for readability */
+    }
     body, div, p, h1, h2, h3, h4, h5, h6, input, label {
-        font-family: 'VT323', Consolas, Courier, monospace !important;
-        color: #33FF33;
-        background-color: #000000;
+        font-family: 'Arial', sans-serif !important;
+        color: #e0e0e0 !important;  /* Light text color for readability */
     }
     
+    @media (max-width: 768px) {
+        .css-1v3fvcr {  /* Sidebar container */
+            width: 100% !important;
+        }
+        .css-1lcbmhc {  /* Main container */
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+        }
+        .css-1aumxhk p, .css-1aumxhk h1, .css-1aumxhk h2, .css-1aumxhk h3, .css-1aumxhk h4, .css-1aumxhk h5, .css-1aumxhk h6 {
+            font-size: 1.5rem !important;  /* Adjust font size for smaller screens */
+        }
+    }
     </style>
     """, unsafe_allow_html=True)
+
 
 def simulate_retirement_savings(
     initial_investment,
@@ -29,24 +49,19 @@ def simulate_retirement_savings(
     family_growth_year=5,
     family_growth_expense=0
 ):
-    # Convert annual rates to monthly
     monthly_return_rate = (1 + annual_return_rate) ** (1/12) - 1
     monthly_inflation_rate = (1 + inflation_rate) ** (1/12) - 1
     monthly_income_growth_rate = (1 + annual_income_growth_rate) ** (1/12) - 1
     
-    # Initialize arrays
     months = np.arange(years_to_retirement * 12 + 1)
     portfolio_value = np.zeros(len(months))
     portfolio_value[0] = initial_investment
     monthly_contribution = np.zeros(len(months))
     monthly_contribution[0] = initial_monthly_contribution
     
-    # Simulate growth
     for i in range(1, len(months)):
-        # Increase monthly contribution due to income growth
         monthly_contribution[i] = monthly_contribution[i-1] * (1 + monthly_income_growth_rate)
         
-        # Adjust for family growth if applicable
         if plan_for_family and i >= family_growth_year * 12:
             adjusted_contribution = max(0, monthly_contribution[i] - family_growth_expense)
         else:
@@ -57,22 +72,20 @@ def simulate_retirement_savings(
             adjusted_contribution
         )
     
-    # Adjust for inflation
     real_value = portfolio_value / (1 + monthly_inflation_rate) ** months
     
-    # Create DataFrame
     df = pd.DataFrame({
         'Month': months,
-        'Nominal Value (Cr)': portfolio_value / 10000000,  # Convert to crores
-        'Real Value (Cr)': real_value / 10000000,  # Convert to crores
-        'Monthly Contribution (Lakhs)': monthly_contribution / 100000  # Convert to lakhs
+        'Nominal Value (Cr)': portfolio_value / 10000000,
+        'Real Value (Cr)': real_value / 10000000,
+        'Monthly Contribution (Lakhs)': monthly_contribution / 100000
     })
-    df['Year'] = df['Month'] // 12 + 2024  # Start from 2024
+    df['Year'] = df['Month'] // 12 + 2024
     
     return df
 
 def create_plot(results, params):
-    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.25,  # Increased spacing
+    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.25,
                         subplot_titles=("Portfolio Value", "Monthly Contribution"),
                         row_heights=[0.65, 0.35])
 
@@ -102,15 +115,10 @@ def create_plot(results, params):
 
     fig.update_layout(
         height=600,
-        width=800,
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-        margin=dict(l=50, r=50, t=120, b=50),  # Increased top margin
+        margin=dict(l=20, r=20, t=120, b=20),
         title=dict(text="Retirement Savings Simulation", y=0.98, x=0.5, xanchor='center', yanchor='top')
     )
-
-    # Adjust subplot titles
-    fig.update_annotations(y=0.95, selector=dict(text="Portfolio Value"))
-    fig.update_annotations(y=0.43, selector=dict(text="Monthly Contribution"))  # Adjusted for more spacing
 
     fig.update_xaxes(title_text="Years", row=2, col=1)
     fig.update_yaxes(title_text="Value (Crores ₹)", row=1, col=1)
@@ -119,10 +127,11 @@ def create_plot(results, params):
     return fig
 
 def main():
+    inject_css()
     st.title("Retirement Savings Simulation")
 
     st.sidebar.header("Input Parameters")
-    initial_investment = st.sidebar.number_input("Initial Investment (₹)", value=0, step=100000, format="%d")  # Default value set to 0
+    initial_investment = st.sidebar.number_input("Initial Investment (₹)", value=0, step=100000, format="%d")
     initial_monthly_contribution = st.sidebar.number_input("Initial Monthly Contribution (₹)", value=100000, step=1000, format="%d")
     annual_return_rate = st.sidebar.slider("Annual Return Rate", 0.01, 0.15, 0.08, 0.01, format="%.2f")
     inflation_rate = st.sidebar.slider("Inflation Rate", 0.01, 0.10, 0.04, 0.01, format="%.2f")
