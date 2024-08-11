@@ -106,11 +106,10 @@ def create_portfolio_value_plot(results):
     fig.update_layout(
         autosize=True,
         height=400,
-        title=dict(text="Portfolio Value Over Time", y=0.98, x=0.5, xanchor='center', yanchor='top'),
         xaxis_title="Years",
         yaxis_title="Value (Crores ₹)",
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-        margin=dict(l=20, r=20, t=40, b=20)
+        margin=dict(l=20, r=20, t=20, b=20)
     )
 
     return fig
@@ -128,10 +127,9 @@ def create_contribution_plot(results):
 
     fig.update_layout(
         height=400,
-        title=dict(text="Monthly Contribution Over Time", y=0.98, x=0.5, xanchor='center', yanchor='top'),
         xaxis_title="Years",
         yaxis_title="Contribution (Lakhs ₹)",
-        margin=dict(l=20, r=20, t=40, b=20)
+        margin=dict(l=20, r=20, t=20, b=20)
     )
 
     return fig
@@ -180,10 +178,12 @@ def main():
         params["Family Expense"] = f"₹{family_growth_expense/100000:.2f} Lakhs/month"
 
     # Generate and display the plots
+    st.header("Portfolio Value Over Time")
     portfolio_value_fig = create_portfolio_value_plot(results)
-    contribution_fig = create_contribution_plot(results)
-
     st.plotly_chart(portfolio_value_fig, use_container_width=True)
+
+    st.header("Monthly Contribution Over Time")
+    contribution_fig = create_contribution_plot(results)
     st.plotly_chart(contribution_fig, use_container_width=True)
 
     st.header("Simulation Parameters")
