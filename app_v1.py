@@ -156,9 +156,9 @@ def create_contribution_plot(results, country):
 def main():
 
     country_options = {
-        "India": "🇮🇳 ₹",
-        "US": "🇺🇸 $",
-        "Japan": "🇯🇵 ¥"
+        "India": "India ₹",
+        "US": "US $",
+        "Japan": "Japan ¥"
     }
     
     # Select country with flags
